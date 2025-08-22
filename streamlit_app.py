@@ -1,151 +1,144 @@
 import streamlit as st
-import pandas as pd
 import math
-from pathlib import Path
 
-# Set the title and favicon that appear in the Browser's tab bar.
-st.set_page_config(
-    page_title='GDP dashboard',
-    page_icon=':earth_americas:', # This is an emoji shortcode. Could be a URL too.
-)
+# 페이지 설정
+st.set_page_config(layout="wide")
 
-# -----------------------------------------------------------------------------
-# Declare some useful functions.
+# --- 1. 상단 제목
+st.title("뮤지컬 배우 알아보기 🎭")
 
-@st.cache_data
-def get_gdp_data():
-    """Grab GDP data from a CSV file.
+# --- 2. 작은 부제목
+st.markdown("### 뮤지컬 배우의 이름을 입력하여 작품 활동을 알아보세요!")
 
-    This uses caching to avoid having to read the file every time. If we were
-    reading from an HTTP endpoint instead of a file, it's a good idea to set
-    a maximum age to the cache with the TTL argument: @st.cache_data(ttl='1d')
-    """
+# --- 3. 검색창
+search_query = st.text_input("배우 이름을 입력하세요.", "")
 
-    # Instead of a CSV on disk, you could read from an HTTP endpoint here too.
-    DATA_FILENAME = Path(__file__).parent/'data/gdp_data.csv'
-    raw_gdp_df = pd.read_csv(DATA_FILENAME)
+# --- 4. 배우 데이터 (이미지 경로를 웹 URL로 수정)
+배우_데이터 = {
+    "김성철": {
+        "사진": "/workspaces/gdp-dashboard-3/웹1.jpg",
+        "작품": ["데스노트", "마이 버킷 리스트", "몬테크리스토", "미스터마우스", "뱀파이어 아더", "베르테르", "빅 피쉬", "사춘기", "스위니토드", "시야 플랫폼:배우들", "안녕! 유에프오", "지킬 앤 하이드", "풍월주", "팬레터", "손탁호텔"],
+        "설명": "1991/12/31"
+    },
+    "김준수": {
+        "사진": "/workspaces/gdp-dashboard-3/웹2.jpg",
+        "작품": ["드라큘라", "데스노트", "도리안 그레이", "모차르트", "알라딘", "엑스칼리버", "엘리자벳", "웨스트 사이드 스토리", "천국의 눈물", "디셈버, 끝나지 않은 노래"],
+        "설명": "1986/12/15"
+    },
+    "민경아": {
+        "사진": "/workspaces/gdp-dashboard-3/웹3.jpg",
+        "작품": ["레드북", "레베카", "렌트", "라스트 파이브 이어스", "몬테크리스토", "베어 더 뮤지컬", "아이다", "알라딘", "웃는 남자", "엑스칼리버", "지킬 앤 하이드", "더 라스트 키스", "시카고"],
+        "설명": "1992/11/10"
+    },
+    "박강현": {
+        "사진": "/workspaces/gdp-dashboard-3/웹4.jpg",
+        "작품": ["디어 에반 핸슨", "라이어 타임", "마리 앙투아네트", "멤피스", "모차르트!", "베어 더 뮤지컬", "웨스트 사이드 스토리", "웃는 남자", "이블데드", "인 더 하이츠", "그레이트 코멧", "광화문 연가", "킹키부츠", "하데스타운", "엑스칼리버", "엘리자벳", "알라딘", "칠서"],
+        "설명": "1989/12/27"
+    },
+    "박은태": {
+        "사진": "/workspaces/gdp-dashboard-3/웹5.jpg",
+        "작품": ["닥터 지바고", "도리안 그레이", "라이온 킹", "모차르트!", "벤허", "베토벤", "사랑은 비를 타고", "스위니 토드", "웃는 남자", "일 테노레", "엘리자벳", "젠틀맨스 가이드:사랑과 살인편", "지저스 크라이스트 수퍼스타", "지킬 앤 하이드", "킹키부츠", "피맛골 연가", "팬텀", "프랑켄슈타인", "햄릿", "황태자 루돌프", "매디슨 카운티의 다리", "노트르담 드 파리"],
+        "설명": "1981/06/14"
+    },
+    "박지연": {
+        "사진": "/workspaces/gdp-dashboard-3/웹6.jpg",
+        "작품": ["고스트", "고스트 베이커리", "금강,1894", "드라큘라", "라스트 파이브 이어스", "레 미자레블", "레베카", "맘마미아", "미남이시네요", "빨래", "시라노", "아리랑", "어쩌면 해피엔딩", "원스", "일 테노레"],
+        "설명": "1988/05/14"
+    },
+    "송은혜": {
+        "사진": "/workspaces/gdp-dashboard-3/웹7.jpg",
+        "작품": ["엘리자벳", "오페라의 유령", "팬텀"],
+        "설명": "1992/12/17"
+    },
+    "이지혜": {
+        "사진": "/workspaces/gdp-dashboard-3/웹8.jpg",
+        "작품": ["기생충", "귀환", "드라큘라", "레베카", "몬테크리스토", "마리 앙투아네트", "미녀와 야수", "베르테르", "스위니 토드", "순수의 시대", "안나 카레니나", "엘리자벳", "오필리어", "지킬 앤 하이드", "파친코 시즌 1,2", "팬텀", "프랑켄슈타인"],
+        "설명": "1990/02/09"
+    },
+    "전동석": {
+        "사진": "/workspaces/gdp-dashboard-3/웹9.jpg",
+        "작품": ["드라큘라", "두 도시 이야기", "더 라스트 키스", "로미오 앤 줄리엣", "마리 앙투아네트", "모차르트!", "몬테크리스토", "젊은 베르테르의 슬픔", "지킬 앤 하이드", "천국의 눈물", "프랑켄슈타인", "팬텀", "해를 품은 달", "헤드윅", "햄릿", "노트르담 드 파리"],
+        "설명": "1988/02/06"
+    },
+    "정선아": {
+        "사진": "/workspaces/gdp-dashboard-3/웹10.jpg",
+        "작품": ["나인", "나폴레옹", "노트르담 드 파리", "드라큘라", "드림걸즈", "데스노트", "맘마미아", "멤피스", "모차르트!", "보디가드", "사운드 오브 뮤직", "쌍화별곡", "시카고", "아이다", "아이 러브 유", "안나 카레니나", "에비타", "유린타운", "웃는 남자", "위키드", "이프/덴", "제너두", "지저스 크라이스트 수퍼스타", "지킬 앤 하이드", "킹키부츠", "텔미 온 어 선데이", "해어화", "갬블러", "겨울연가", "광화문 연가", "렌트"],
+        "설명": "1984/10/12"
+    }
+}
 
-    MIN_YEAR = 1960
-    MAX_YEAR = 2022
 
-    # The data above has columns like:
-    # - Country Name
-    # - Country Code
-    # - [Stuff I don't care about]
-    # - GDP for 1960
-    # - GDP for 1961
-    # - GDP for 1962
-    # - ...
-    # - GDP for 2022
-    #
-    # ...but I want this instead:
-    # - Country Name
-    # - Country Code
-    # - Year
-    # - GDP
-    #
-    # So let's pivot all those year-columns into two: Year and GDP
-    gdp_df = raw_gdp_df.melt(
-        ['Country Code'],
-        [str(x) for x in range(MIN_YEAR, MAX_YEAR + 1)],
-        'Year',
-        'GDP',
+배우_이름_목록 = sorted(list(배우_데이터.keys()))
+
+# 검색 결과 필터링
+if search_query:
+    filtered_배우_이름 = [name for name in 배우_이름_목록 if search_query.lower() in name.lower()]
+else:
+    filtered_배우_이름 = 배우_이름_목록
+
+# 세션 상태 초기화
+if "selected_actor" not in st.session_state:
+    st.session_state.selected_actor = None
+
+# 상세 페이지 또는 목록 페이지 표시
+if st.session_state.selected_actor:
+    st.markdown("---")
+    if st.button("← 돌아가기"):
+        st.session_state.selected_actor = None
+        st.rerun()
+
+    actor_name = st.session_state.selected_actor
+    actor_info = 배우_데이터[actor_name]
+
+    st.markdown(f"## {actor_name}")
+    st.image(actor_info["사진"], width=300)
+    st.markdown(f"**생년월일:** {actor_info.get('설명', '정보 없음')}")
+    st.markdown("### 주요 작품")
+    # 작품 목록을 2개의 컬럼으로 나누어 보기 좋게 표시
+    col1, col2 = st.columns(2)
+    mid_point = math.ceil(len(actor_info["작품"]) / 2)
+    with col1:
+        for 작품 in actor_info["작품"][:mid_point]:
+            st.markdown(f"- {작품}")
+    with col2:
+        for 작품 in actor_info["작품"][mid_point:]:
+            st.markdown(f"- {작품}")
+
+else:
+    # 페이지네이션
+    actors_per_page = 9
+    total_actors = len(filtered_배우_이름)
+    total_pages = math.ceil(total_actors / actors_per_page) if total_actors > 0 else 1
+
+    if "page" not in st.session_state:
+        st.session_state.page = 1
+    
+    # 현재 페이지가 전체 페이지 수를 넘지 않도록 조정
+    if st.session_state.page > total_pages:
+        st.session_state.page = total_pages
+
+    # 페이지 선택 (UI)
+    st.selectbox(
+        "페이지 선택", 
+        options=range(1, total_pages + 1), 
+        key="page",
+        format_func=lambda i: f"{i} 페이지"
     )
 
-    # Convert years from string to integers
-    gdp_df['Year'] = pd.to_numeric(gdp_df['Year'])
+    start_idx = (st.session_state.page - 1) * actors_per_page
+    end_idx = start_idx + actors_per_page
+    page_actors = filtered_배우_이름[start_idx:end_idx]
 
-    return gdp_df
+    # 썸네일 표시 (st.image와 st.button 사용)
+    columns = st.columns(3)
+    for i, actor in enumerate(page_actors):
+        with columns[i % 3]:
+            st.image(배우_데이터[actor]["사진"])
+            st.markdown(f"<h5 style='text-align: center;'>{actor}</h5>", unsafe_allow_html=True)
+            if st.button("자세히 보기", key=f"btn_{actor}", use_container_width=True):
+                st.session_state.selected_actor = actor
+                st.rerun()
 
-gdp_df = get_gdp_data()
-
-# -----------------------------------------------------------------------------
-# Draw the actual page
-
-# Set the title that appears at the top of the page.
-'''
-# :earth_americas: GDP dashboard
-
-Browse GDP data from the [World Bank Open Data](https://data.worldbank.org/) website. As you'll
-notice, the data only goes to 2022 right now, and datapoints for certain years are often missing.
-But it's otherwise a great (and did I mention _free_?) source of data.
-'''
-
-# Add some spacing
-''
-''
-
-min_value = gdp_df['Year'].min()
-max_value = gdp_df['Year'].max()
-
-from_year, to_year = st.slider(
-    'Which years are you interested in?',
-    min_value=min_value,
-    max_value=max_value,
-    value=[min_value, max_value])
-
-countries = gdp_df['Country Code'].unique()
-
-if not len(countries):
-    st.warning("Select at least one country")
-
-selected_countries = st.multiselect(
-    'Which countries would you like to view?',
-    countries,
-    ['DEU', 'FRA', 'GBR', 'BRA', 'MEX', 'JPN'])
-
-''
-''
-''
-
-# Filter the data
-filtered_gdp_df = gdp_df[
-    (gdp_df['Country Code'].isin(selected_countries))
-    & (gdp_df['Year'] <= to_year)
-    & (from_year <= gdp_df['Year'])
-]
-
-st.header('GDP over time', divider='gray')
-
-''
-
-st.line_chart(
-    filtered_gdp_df,
-    x='Year',
-    y='GDP',
-    color='Country Code',
-)
-
-''
-''
-
-
-first_year = gdp_df[gdp_df['Year'] == from_year]
-last_year = gdp_df[gdp_df['Year'] == to_year]
-
-st.header(f'GDP in {to_year}', divider='gray')
-
-''
-
-cols = st.columns(4)
-
-for i, country in enumerate(selected_countries):
-    col = cols[i % len(cols)]
-
-    with col:
-        first_gdp = first_year[first_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-        last_gdp = last_year[last_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-
-        if math.isnan(first_gdp):
-            growth = 'n/a'
-            delta_color = 'off'
-        else:
-            growth = f'{last_gdp / first_gdp:,.2f}x'
-            delta_color = 'normal'
-
-        st.metric(
-            label=f'{country} GDP',
-            value=f'{last_gdp:,.0f}B',
-            delta=growth,
-            delta_color=delta_color
-        )
+    # 검색 결과가 없을 때
+    if not filtered_배우_이름:
+        st.warning("일치하는 뮤지컬 배우가 없습니다.")
